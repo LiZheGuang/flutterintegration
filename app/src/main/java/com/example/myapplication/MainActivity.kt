@@ -17,31 +17,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Button
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.*
-import android.util.Log
 import io.flutter.embedding.android.FlutterActivity;
-import io.flutter.embedding.android.FlutterFragment
-//import io.flutter.embedding.android.*;
-import  android.content.Context
-import androidx.core.content.ContextCompat.startActivity
-import android.os.Handler
+
 class MainActivity : ComponentActivity() {
-    fun openFlutterActivity() {
-        val intent = FlutterActivity.createDefaultIntent(this)
-//        startActivity(intent)
-//         val handler = Handler()
-
-//         handler.postDelayed({
-             startActivity(intent)
-//         }, 5000) // 5000 milliseconds = 5 seconds
-    }
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
 
+        fun openFlutterActivity() {
+            val intent = FlutterActivity.createDefaultIntent(this)
+            startActivity(intent)
+        }
 
         super.onCreate(savedInstanceState)
         setContent {
@@ -73,7 +60,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 fun DemoButton(action:() -> Unit) {
     // 创建一个可变的Boolean状态值
     var buttonText by rememberSaveable { mutableStateOf("Click Me") }
-
     // 使用`Button`组件创建一个按钮
     Button(
         onClick = {
@@ -81,7 +67,7 @@ fun DemoButton(action:() -> Unit) {
             buttonText = "Clicked!"
             action()
         },
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.wrapContentSize().padding(10.dp)
     ) {
         // 展示当前按钮文本
         Text(text = buttonText)
