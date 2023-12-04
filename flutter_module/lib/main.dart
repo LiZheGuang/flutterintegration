@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'detail.dart' as Detail;
 
@@ -48,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _clickCallback() async {
     var response = await platform.invokeMethod('onCallGetFunction');
     debugPrint("安卓原生方法");
+
     debugPrint(response);
   }
 
@@ -61,6 +63,26 @@ class _MyHomePageState extends State<MyHomePage> {
     var response = await platform.invokeMethod(methodName);
     debugPrint("安卓原生方法");
     debugPrint(response);
+  }
+
+  void _clickOpenPhoto() async {
+    final ImagePicker picker = ImagePicker();
+    // Pick an image.
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    // Capture a photo.
+    final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+    // Pick a video.
+    final XFile? galleryVideo =
+        await picker.pickVideo(source: ImageSource.gallery);
+    // Capture a video.
+    final XFile? cameraVideo =
+        await picker.pickVideo(source: ImageSource.camera);
+    // Pick multiple images.
+    final List<XFile> images = await picker.pickMultiImage();
+    // Pick singe image or video.
+    final XFile? media = await picker.pickMedia();
+    // Pick multiple images and videos.
+    final List<XFile> medias = await picker.pickMultipleMedia();
   }
 
   Future<String> _getBatteryLevel() async {
@@ -117,6 +139,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 },
                 child: const Text('跳转到Flutter页面'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _clickOpenPhoto();
+                },
+                child: const Text('打开相机'),
               )
             ],
           ),
