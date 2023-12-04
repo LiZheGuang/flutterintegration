@@ -1,7 +1,11 @@
 package com.example.myapplication
 
+import android.content.Context
 import android.content.Intent
+import android.os.BatteryManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,14 +25,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.*
 import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.plugin.common.MethodChannel
 
+import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.plugin.common.BinaryMessenger
+
+// Android UI视图
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        fun openFlutterActivity() {
-            val intent = FlutterActivity.createDefaultIntent(this)
-            startActivity(intent)
-        }
 
         super.onCreate(savedInstanceState)
         setContent {
@@ -38,16 +42,93 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android111", modifier = Modifier.offset(45.dp, 24.dp))
-                    Greeting("demo")
-                    DemoButton(::openFlutterActivity)
-//                    openFlutterActivity()
+                    Greeting("这是一个原生安卓页面", modifier = Modifier.offset(45.dp, 24.dp))
                 }
             }
         }
     }
 }
 
+fun isMainThread() = Looper.getMainLooper().thread == Thread.currentThread()
+fun Handler.postDelayed(delay: Long, runnable: Runnable) = postDelayed(runnable, delay)
+class MethodChannelActivity : FlutterActivity() {
+    companion object {
+        private const val CHANNEL_NAME = "com.bqt.test/base_channel"
+        private const val METHOD_NAME = "getBatteryLevel"
+        private const val METHOD_NAME_ONE = "onCallGetFunction"
+        private  const val METHOD_NAME_TWO = "onCallNeXtSwitchBackground"
+        private  const val METHOD_NAME_ROUTER = "onCallNextAddRouter"
+    }
+
+    //    通过任务来进行通信
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        println(message = "configureFlutterEngine");
+        val binaryMessenger: BinaryMessenger = flutterEngine.dartExecutor.binaryMessenger
+        MethodChannel(binaryMessenger, CHANNEL_NAME).setMethodCallHandler { call, result ->
+            when (call.method) {
+                METHOD_NAME -> onCallGetBatteryLevel(result)
+                METHOD_NAME_ONE ->onCallGetFunction(result)
+                METHOD_NAME_TWO -> onCallNeXtSwitchBackground(result)
+                METHOD_NAME_ROUTER-> onCallNextAddRouter(result)
+                else -> result.notImplemented()
+            }
+        }
+    }
+
+    private fun onCallGetBatteryLevel(result: MethodChannel.Result) {
+        println("onCallGetBatteryLevel:${result}");
+        println("onCallGetBatteryLevel, isMainThread：${isMainThread()}") // true
+        Thread {
+            val batteryManager = getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+            val batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+            if (batteryLevel != -1) {
+                result.success(batteryLevel) // 可在子线程响应请求
+                println("result callback, isMainThread：${isMainThread()}") // false
+            } else {
+                result.error("UNAVAILABLE", "Battery level not available.", null)
+            }
+        }.start()
+    }
+
+    private fun onCallGetFunction(result: MethodChannel.Result) {
+        println("onCallGetBatteryLevel:${result}");
+        println("onCallGetBatteryLevel, isMainThread：${isMainThread()}") // true
+
+        Thread {
+            result.success("执行了原生自定义onCallGetFunction方法"); // 可在子线程响应请求
+            println("result callback, isMainThread：${isMainThread()}") // false
+        }.start()
+    }
+
+    // 切到后台
+    private fun onCallNeXtSwitchBackground(result: MethodChannel.Result){
+        val intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_HOME)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+
+
+        Thread {
+            result.success("执行了原生自定义onCallNeXtSwitchBackground方法"); // 可在子线程响应请求
+            println("result callback, isMainThread：${isMainThread()}") // false
+        }.start()
+    }
+
+    //    路由跳转
+    private fun onCallNextAddRouter(result: MethodChannel.Result){
+        fun goToTargetActivity() {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+        goToTargetActivity()
+        Thread {
+            result.success("执行了原生自定义onCallNextAddRouter方法"); // 可在子线程响应请求
+            println("result callback, isMainThread：${isMainThread()}") // false
+        }.start()
+    }
+
+}
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
