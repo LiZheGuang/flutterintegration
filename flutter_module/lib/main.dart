@@ -38,6 +38,31 @@ class _MyHomePageState extends State<MyHomePage> {
   String _batteryLevel = '';
   int _counter = 0;
 
+  // 用于互相主动发送消息，也可用于传递字符串或半结构化的消息
+  static const BasicMessageChannel<String> _channel =
+      BasicMessageChannel('com.bqt.test/basic_channel', StringCodec());
+  String _message = "message";
+  String _response = "response";
+  void initState() {
+    super.initState();
+    debugPrint("initState");
+    _channel.setMessageHandler((String? message) async {
+      debugPrint("message: $message"); // 收到的 native 发送的消息
+      _message = message ?? "null";
+      setState(() => _message);
+      return '已收到【$message】'; // 对 native 的响应
+    });
+  }
+
+  void _request() async {
+    final String? response =
+        await _channel.send('来自 Dart 的请求'); // 对 native 发起请求
+    debugPrint("response: $response"); // 收到的 native 响应
+    _response = response ?? "null";
+    setState(() => _response);
+  }
+  // 用于互相主动发送消息，也可用于传递字符串或半结构化的消息
+
   void _incrementCounter() {
     setState(() =>
         _counter++); // This call to setState causes rerun the build method below
@@ -145,7 +170,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   _clickOpenPhoto();
                 },
                 child: const Text('打开相机'),
-              )
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _request();
+                },
+                child: Text(_response),
+              ),
+              Text(_message),
             ],
           ),
         ),
