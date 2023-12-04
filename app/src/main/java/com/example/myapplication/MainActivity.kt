@@ -35,8 +35,16 @@ import io.flutter.plugin.common.StringCodec
 
 // Android UI视图
 class MainActivity : ComponentActivity() {
+//    private fun gotoRouter()  {
+//        println(message = "gotoRouter");
+//
+//    }
     override fun onCreate(savedInstanceState: Bundle?) {
-
+        fun goToTargetActivity() {
+            val intent = Intent(this, MethodChannelActivity::class.java)
+            startActivity(intent)
+        }
+//    goToTargetActivity()
         super.onCreate(savedInstanceState)
         setContent {
             MyApplicationTheme {
@@ -46,6 +54,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Greeting("这是一个原生安卓页面", modifier = Modifier.offset(45.dp, 24.dp))
+                    DemoButton(action = {goToTargetActivity()})
                 }
             }
         }
@@ -160,7 +169,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun DemoButton(action:() -> Unit) {
     // 创建一个可变的Boolean状态值
-    var buttonText by rememberSaveable { mutableStateOf("Click Me") }
+    var buttonText by rememberSaveable { mutableStateOf("跳转到FLUTTER") }
     // 使用`Button`组件创建一个按钮
     Button(
         onClick = {

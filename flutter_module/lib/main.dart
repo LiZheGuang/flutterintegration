@@ -35,6 +35,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = MethodChannel('com.bqt.test/base_channel');
+
   String _batteryLevel = '';
   int _counter = 0;
 
