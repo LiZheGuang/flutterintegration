@@ -1,3 +1,3 @@
 setBinding(new Binding([gradle: this]))
-evaluate(new File(settingsDir.parentFile, 'MyApplication3/flutter_module/.android/include_flutter.groovy'))
+evaluate(new File(settingsDir.parentFile, 'MyApplication3/car_square/.android/include_flutter.groovy'))
 
