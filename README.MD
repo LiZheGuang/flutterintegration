@@ -1,5 +1,8 @@
 #  android 集成
 
+## 分支 
+master 集成方案
+flutter 自用于调试
 ## 注意
 
 高版本集成方案参考
